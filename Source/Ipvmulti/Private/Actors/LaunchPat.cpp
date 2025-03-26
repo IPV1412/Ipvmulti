@@ -3,12 +3,15 @@
 
 #include "Ipvmulti/Public/Actors/LaunchPat.h"
 
+#include "Components/BoxComponent.h"
 
 // Sets default values
 ALaunchPat::ALaunchPat()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	MeshComp=CreateDefaultSubobject<UStaticMeshComponent>("MeshComp");
+	OverlapComp= CreateDefaultSubobject<UBoxComponent>("BoxComp");
+	RootComponent= OverlapComp;
+	MeshComp->SetupAttachment(OverlapComp);
 }
 
 // Called when the game starts or when spawned

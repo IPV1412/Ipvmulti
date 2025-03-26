@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "LaunchPat.generated.h"
-
+class UBoxComponent; 
 UCLASS()
 class IPVMULTI_API ALaunchPat : public AActor
 {
@@ -18,6 +18,15 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UStaticMeshComponent* MeshComp;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UBoxComponent* OverlapComp;
+
+	void OverlapLaunchpat();
+	
 
 public:
 	// Called every frame
