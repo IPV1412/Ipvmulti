@@ -62,9 +62,28 @@ AIpvmultiCharacter::AIpvmultiCharacter()
 
 	//Initialize projectile class
 	ProjectileClass = AProyectil::StaticClass();
+	
 	//Initialize fire rate
 	FireRate = 0.25f;
 	bIsFiringWeapon = false;
+
+	//Inicializar Munición 
+	MaxAmmo     = 5;
+	CurrentAmmo = MaxAmmo;
+
+	// Habilitar replicación en el actor
+	//bReplicates = true;
+}
+
+void AIpvmultiCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (HasAuthority())
+	{
+		// Asegurar que el servidor comience con munición = MaxAmmo
+		CurrentAmmo = MaxAmmo;
+	}
 }
 
 void AIpvmultiCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -73,6 +92,9 @@ void AIpvmultiCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 
 	//Replicate current health.
 	DOREPLIFETIME(AIpvmultiCharacter, CurrentHealth);
+	
+	// Replica CurrentAmmo
+	DOREPLIFETIME(AIpvmultiCharacter, CurrentAmmo);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -81,6 +103,17 @@ void AIpvmultiCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 void AIpvmultiCharacter::OnRep_CurrentHealth()
 {
 	OnHealthUpdate();
+}
+
+void AIpvmultiCharacter::OnRep_CurrentAmmo()
+{
+	// Aquí puedes, por ejemplo, disparar un evento Blueprint para actualizar la UI
+	// Si tu HUD/Widget tiene binding directo a GetCurrentAmmo(), no necesitas más código.
+	if (IsLocallyControlled())
+	{
+		FString ammoMsg = FString::Printf(TEXT("Munición actual: %d"), CurrentAmmo);
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Orange, ammoMsg);
+	}
 }
 
 void AIpvmultiCharacter::NotifyControllerChanged()
@@ -129,14 +162,17 @@ void AIpvmultiCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 void AIpvmultiCharacter::OnHealthUpdate_Implementation()
 {//Client-specific functionality
 	if (IsLocallyControlled())
-	{             FString healthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
+	{
+		FString healthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
+
 		if (CurrentHealth <= 0)
 		{
 			FString deathMessage = FString::Printf(TEXT("You have been killed."));
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
 		}
-	}          //Server-specific functionality
+	}
+	//Server-specific functionality
 	if (GetLocalRole() == ROLE_Authority)
 	{
 		FString healthMessage = FString::Printf(TEXT("%s now has %f health remaining."), *GetFName().ToString(), CurrentHealth);
@@ -204,7 +240,8 @@ void AIpvmultiCharacter::StartFire()
 		bIsFiringWeapon = true;
 		UWorld* World = GetWorld();
 		World->GetTimerManager().SetTimer(FiringTimer, this, &AIpvmultiCharacter::StopFire, FireRate, false);
-		HandleFire();
+		//HandleFire();
+		TryFire();
 	}
 }
  
@@ -212,7 +249,49 @@ void AIpvmultiCharacter::StopFire()
 {
 	bIsFiringWeapon = false;
 }
- 
+
+void AIpvmultiCharacter::TryFire()
+{
+	// Solo dispara si hay munición
+	if (CurrentAmmo > 0)
+	{
+		if (HasAuthority())
+		{
+			// Ya estamos en servidor: spawn + decrementar munición
+			HandleFire();
+			SetCurrentAmmo(CurrentAmmo - 1);
+		}
+		else
+		{
+			// Cliente envía petición al servidor
+			ServerHandleFire();
+		}
+	}
+	else
+	{
+		if (IsLocallyControlled())
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Sin munición."));
+		}
+	}
+}
+
+bool AIpvmultiCharacter::ServerHandleFire_Validate()
+{
+	return true;
+}
+
+void AIpvmultiCharacter::ServerHandleFire_Implementation()
+{
+	// En servidor, verificar munición y disparar
+	if (CurrentAmmo <= 0)
+	{
+		return;
+	}
+	HandleFire();
+	SetCurrentAmmo(CurrentAmmo - 1);
+}
+
 void AIpvmultiCharacter::HandleFire_Implementation()
 {
 	FVector spawnLocation = GetActorLocation() + ( GetActorRotation().Vector()  * 100.0f ) + (GetActorUpVector() * 50.0f);
@@ -223,4 +302,33 @@ void AIpvmultiCharacter::HandleFire_Implementation()
 	spawnParameters.Owner = this;
  
 	AProyectil* spawnedProjectile = GetWorld()->SpawnActor<AProyectil>(spawnLocation, spawnRotation, spawnParameters);
+}
+
+void AIpvmultiCharacter::RestoreAmmo()
+{
+	if (HasAuthority())
+	{
+		SetCurrentAmmo(MaxAmmo);
+	}
+	else
+	{
+		ServerRestoreAmmo();
+	}
+}
+
+bool AIpvmultiCharacter::ServerRestoreAmmo_Validate()
+{
+	return true;
+}
+
+void AIpvmultiCharacter::ServerRestoreAmmo_Implementation()
+{
+	SetCurrentAmmo(MaxAmmo);
+}
+
+void AIpvmultiCharacter::SetCurrentAmmo(int32 NewAmmo)
+{
+	if (!HasAuthority()) return;
+
+	CurrentAmmo = FMath::Clamp(NewAmmo, 0, MaxAmmo);
 }

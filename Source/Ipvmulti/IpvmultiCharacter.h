@@ -50,6 +50,7 @@ class AIpvmultiCharacter : public ACharacter
 
 public:
 	AIpvmultiCharacter();
+	void BeginPlay();
 
 	/** Property replication */     void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -103,6 +104,10 @@ public:
 	/** Event for taking damage. Overridden from APawn.*/
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float TakeDamage( float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser ) override;
+	
+
+	/** Llamar desde el pickup para restaurar munición */
+	void RestoreAmmo();
 
 protected: //Proyectil
 	UPROPERTY(EditDefaultsOnly, Category="Gameplay|Projectile")
@@ -123,5 +128,36 @@ protected: //Proyectil
 	void HandleFire();
 	/** A timer handle used for providing the fire rate delay in-between spawns.*/
 	FTimerHandle FiringTimer;
+
+	
+	// --- SISTEMA DE MUNICIÓN --- //
+
+	/** Valor máximo de munición */
+	UPROPERTY(EditDefaultsOnly, Category = "Armas")
+	int32 MaxAmmo;
+
+	/** Munición actual, replicada usando OnRep */
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentAmmo, BlueprintReadOnly, Category = "Armas")
+	int32 CurrentAmmo;
+
+	/** OnRep que se dispara en clientes cuando CurrentAmmo cambia */
+	UFUNCTION()
+	void OnRep_CurrentAmmo();
+
+	/** Setter interno de munición (solo servidor) */
+	void SetCurrentAmmo(int32 NewAmmo);
+
+	/** RPC: petición del cliente para disparar (servidor verifica munición y spawnea) */
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerHandleFire();
+
+	/** RPC: petición del cliente para restaurar munición (pickup) */
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRestoreAmmo();
+
+	/** Llamar desde input/blueprint: intenta disparar */
+	UFUNCTION(BlueprintCallable, Category="Armas")
+	void TryFire();
+	
 };
 
