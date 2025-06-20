@@ -105,7 +105,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float TakeDamage( float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser ) override;
 	
-
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	void OpenLobby();
+	
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	void CallOpenLevel(const FString& IPAndress);
+	
 	/** Llamar desde el pickup para restaurar munición */
 	void RestoreAmmo();
 
@@ -155,7 +160,7 @@ protected: //Proyectil
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerRestoreAmmo();
 
-	/** Llamar desde input/blueprint: intenta disparar */
+	/** Intenta disparar */
 	UFUNCTION(BlueprintCallable, Category="Armas")
 	void TryFire();
 	

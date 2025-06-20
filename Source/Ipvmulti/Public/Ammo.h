@@ -22,11 +22,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Pickup")
 	USphereComponent* SphereComp;
 
-	/** Malla visible del pickup (puede cambiarse en el Editor) */
+	/** Malla visible del pickup */
 	UPROPERTY(VisibleAnywhere, Category = "Pickup")
 	UStaticMeshComponent* MeshComp;
 
-	/** Función que se llama cuando otro actor entra en el SphereComp */
+	/** Se llama cuando otro actor entra en el SphereComp */
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 						AActor* OtherActor,

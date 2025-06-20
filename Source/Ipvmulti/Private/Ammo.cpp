@@ -7,7 +7,7 @@ AAmmo::AAmmo()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Habilitar replicación del actor (opcional, pero recomendado para multiplayer)
+	// Habilitar replicación
 	bReplicates = true;
 
 	// Crear y configurar el SphereComponent
@@ -18,7 +18,7 @@ AAmmo::AAmmo()
 	SphereComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	RootComponent = SphereComp;
 
-	// Crear y configurar el StaticMeshComponent (la malla visible del pickup)
+	// Configuracion el StaticMeshComponent
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(RootComponent);
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -47,8 +47,7 @@ void AAmmo::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	{
 		return;
 	}
-
-	// Intentar castear al personaje para llamar RestoreAmmo()
+	
 	AIpvmultiCharacter* MyPlayer = Cast<AIpvmultiCharacter>(OtherActor);
 	if (MyPlayer)
 	{

@@ -13,6 +13,7 @@
 #include "Actors/Proyectil.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/Engine.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -107,8 +108,6 @@ void AIpvmultiCharacter::OnRep_CurrentHealth()
 
 void AIpvmultiCharacter::OnRep_CurrentAmmo()
 {
-	// Aquí puedes, por ejemplo, disparar un evento Blueprint para actualizar la UI
-	// Si tu HUD/Widget tiene binding directo a GetCurrentAmmo(), no necesitas más código.
 	if (IsLocallyControlled())
 	{
 		FString ammoMsg = FString::Printf(TEXT("Munición actual: %d"), CurrentAmmo);
@@ -195,6 +194,18 @@ float AIpvmultiCharacter::TakeDamage(float DamageTaken, struct FDamageEvent cons
 	float damageApplied = CurrentHealth - DamageTaken;
 	SetCurrentHealth(damageApplied);
 	return damageApplied;
+}
+
+void AIpvmultiCharacter::OpenLobby()
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+	World->ServerTravel("/Game/ThirdPerson/Maps/ThirdPersonMap.ThirdPersonMap?listen");
+}
+
+void AIpvmultiCharacter::CallOpenLevel(const FString& IPAndres)
+{
+	UGameplayStatics::OpenLevel(this,*IPAndres);
 }
 
 void AIpvmultiCharacter::Move(const FInputActionValue& Value)
