@@ -171,6 +171,12 @@ void AIpvmultiCharacter::OnHealthUpdate_Implementation()
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
 		}
 	}
+	
+	if (CurrentHealth <= 0)
+	{
+		HandleDeath();
+	}
+	
 	//Server-specific functionality
 	if (GetLocalRole() == ROLE_Authority)
 	{
@@ -200,7 +206,7 @@ void AIpvmultiCharacter::OpenLobby()
 {
 	UWorld* World = GetWorld();
 	if (!World) return;
-	World->ServerTravel("/Game/ThirdPerson/Maps/ThirdPersonMap.ThirdPersonMap?listen");
+	World->ServerTravel("Game/ThirdPerson/Maps/ThirdPersonMap.ThirdPersonMap?listen");
 }
 
 void AIpvmultiCharacter::CallOpenLevel(const FString& IPAndres)
@@ -259,6 +265,30 @@ void AIpvmultiCharacter::StartFire()
 void AIpvmultiCharacter::StopFire()
 {
 	bIsFiringWeapon = false;
+}
+
+void AIpvmultiCharacter::HandleDeath_Implementation()
+{
+	// Activa Ragdoll
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// Desactiva input SOLO para el jugador que controla este pawn
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		DisableInput(PC);
+
+		// Timer para cambiar de nivel solo para este jugador
+		FTimerHandle DeathTimer;
+		GetWorld()->GetTimerManager().SetTimer(DeathTimer, [PC]()
+		{
+			if (PC && PC->IsLocalController())
+			{
+				UGameplayStatics::OpenLevel(PC, FName("GameOver"));
+			}
+		}, 5.0f, false);
+	}
 }
 
 void AIpvmultiCharacter::TryFire()

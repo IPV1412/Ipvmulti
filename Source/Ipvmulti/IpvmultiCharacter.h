@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "GameFramework/PlayerController.h"
+#include "TimerManager.h"
 #include "IpvmultiCharacter.generated.h"
 
 class USpringArmComponent;
@@ -50,9 +52,11 @@ class AIpvmultiCharacter : public ACharacter
 
 public:
 	AIpvmultiCharacter();
+	
 	void BeginPlay();
 
-	/** Property replication */     void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	/** Property replication */
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 
@@ -114,7 +118,8 @@ public:
 	/** Llamar desde el pickup para restaurar munición */
 	void RestoreAmmo();
 
-protected: //Proyectil
+protected:
+// ---  Proyectil  --- //
 	UPROPERTY(EditDefaultsOnly, Category="Gameplay|Projectile")
 	TSubclassOf<class AProyectil> ProjectileClass;
 	/** Delay between shots in seconds. Used to control fire rate for your test projectile, but also to prevent an overflow of server functions from binding SpawnProjectile directly to input.*/
@@ -129,11 +134,15 @@ protected: //Proyectil
 	UFUNCTION(BlueprintCallable, Category = "Gameplay")
 	void StopFire();
 	/** Server function for spawning projectiles.*/
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, Category = "Gameplay")
 	void HandleFire();
 	/** A timer handle used for providing the fire rate delay in-between spawns.*/
 	FTimerHandle FiringTimer;
+	
+	// --- MUERTE --- //
 
+	UFUNCTION(NetMulticast, Reliable, Category = "Muerte")
+	void HandleDeath();
 	
 	// --- SISTEMA DE MUNICIÓN --- //
 
