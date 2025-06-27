@@ -285,7 +285,7 @@ void AIpvmultiCharacter::HandleDeath_Implementation()
 		{
 			if (PC && PC->IsLocalController())
 			{
-				UGameplayStatics::OpenLevel(PC, FName("GameOver"));
+				//UGameplayStatics::OpenLevel(PC, FName("GameOver"));
 			}
 		}, 5.0f, false);
 	}
