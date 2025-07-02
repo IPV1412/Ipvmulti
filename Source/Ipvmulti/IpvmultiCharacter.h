@@ -118,6 +118,9 @@ public:
 	/** Llamar desde el pickup para restaurar munición */
 	void RestoreAmmo();
 
+	UPROPERTY(BlueprintReadOnly, Category = "Objetive")
+	bool bCarryObjetive = false; 
+
 protected:
 // ---  Proyectil  --- //
 	UPROPERTY(EditDefaultsOnly, Category="Gameplay|Projectile")

@@ -308,7 +308,7 @@ void AIpvmultiCharacter::TryFire()
 			ServerHandleFire();
 		}
 	}
-	else
+	else 
 	{
 		if (IsLocallyControlled())
 		{
