@@ -7,7 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "ObjetiveZone.generated.h"
 
-class UBoxComponent; 
+class UBoxComponent;
+class UStaticMeshComponent;
 
 UCLASS()
 class IPVMULTI_API AObjetiveZone : public AActor
@@ -27,8 +28,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Component")
 	TObjectPtr<UBoxComponent> OverlapComp;
 
+	UPROPERTY(VisibleAnywhere, Category="Component")
+	UDecalComponent* Decalcomp;
+
 	UFUNCTION()
 	void HandleOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
+	
 };
