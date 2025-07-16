@@ -11,6 +11,7 @@
 // Sets default values
 AObjectiveActor::AObjectiveActor()
 {
+	bReplicates = true;
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RootComponent = MeshComp;
