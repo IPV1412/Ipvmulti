@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "IpvmultiGameMode.h"
+#include "Game/IpvmultiGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -12,24 +13,14 @@ AIpvmultiGameMode::AIpvmultiGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+	GameStateClass = AIpvmultiGameState::StaticClass();
+	
 }
 
 void AIpvmultiGameMode::CompleteMission(APawn* Pawn)
 {
 	if (Pawn == nullptr) return;
-	Pawn->DisableInput(nullptr);
-	OnMissionComplete(Pawn);
-
-	/*
-	TArray<AActor*> FoundSpectators;
-	UGameplayStatics::GetAllActorsOfClass(this, SpectatorViewClass, FoundSpectators);
-
-	if (FoundSpectators.Num() > 0 && FoundSpectators[0])
-	{
-		PC->SetViewTargetWithBlend(FoundSpectators[0], 1.0f, EViewTargetBlendFunction::VTBlend_Linear);
-	}
-	*/
-
+	//Pawn->DisableInput(nullptr);
 	if (SpectatorViewClass)
 	{
 		TArray<AActor*> ReturnActors;
@@ -44,4 +35,10 @@ void AIpvmultiGameMode::CompleteMission(APawn* Pawn)
 			}
 		}
 	}
+	AIpvmultiGameState* GS = GetGameState<AIpvmultiGameState>();
+	if (GS)
+	{
+		GS->MulticastOnMissionComplete(Pawn, true);
+	}
+	OnMissionComplete(Pawn);
 }

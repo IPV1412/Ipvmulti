@@ -12,6 +12,7 @@ class IPVMULTI_API AIpvmultiGameState : public AGameStateBase
 	GENERATED_BODY()
 	
 	public:
+	UFUNCTION(NetMulticast, Reliable)
 	void MulticastOnMissionComplete(APawn* InstigatorPawn, bool bMissionSuccess);
 	
 };
