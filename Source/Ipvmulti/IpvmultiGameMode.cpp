@@ -28,11 +28,15 @@ void AIpvmultiGameMode::CompleteMission(APawn* Pawn)
 		if (ReturnActors.Num() > 0)
 		{
 			AActor* SpectatorActor = ReturnActors[0];
-			APlayerController* PC = Cast<APlayerController>(Pawn->GetController());
-			if (PC)
+			for (FConstPlayerControllerIterator It=GetWorld()->GetPlayerControllerIterator(); It; It++)
 			{
-				PC->SetViewTargetWithBlend(ReturnActors[0], 1.0f, EViewTargetBlendFunction::VTBlend_Cubic);
+				APlayerController* PC = It->Get();
+				if (PC)
+				{
+					PC->SetViewTargetWithBlend(SpectatorActor,1.0f,VTBlend_Cubic);
+				}
 			}
+
 		}
 	}
 	AIpvmultiGameState* GS = GetGameState<AIpvmultiGameState>();
