@@ -11,8 +11,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Actors/Proyectil.h"
+#include "Blueprint/UserWidget.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/Engine.h"
+#include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -269,25 +271,28 @@ void AIpvmultiCharacter::StopFire()
 
 void AIpvmultiCharacter::HandleDeath_Implementation()
 {
-	// Activa Ragdoll
+	// Activar Ragdoll
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	// Desactiva input SOLO para el jugador que controla este pawn
+	// Desactivar input SOLO para el jugador que controla este pawn
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
 		DisableInput(PC);
-
-		// Timer para cambiar de nivel solo para este jugador
+		
 		FTimerHandle DeathTimer;
-		GetWorld()->GetTimerManager().SetTimer(DeathTimer, [PC]()
+		GetWorld()->GetTimerManager().SetTimer(DeathTimer, [this, PC]()
 		{
-			if (PC && PC->IsLocalController())
+			if (HasAuthority())
 			{
-				//UGameplayStatics::OpenLevel(PC, FName("GameOver"));
+				if (AGameModeBase* GM = UGameplayStatics::GetGameMode(this))
+				{
+					this->Destroy();
+					GM->RestartPlayer(PC);
+				}
 			}
-		}, 5.0f, false);
+		},  3.0f, false);
 	}
 }
 

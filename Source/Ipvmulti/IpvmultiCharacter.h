@@ -84,9 +84,6 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Health")
 	void OnHealthUpdate();
 	
-
-
-	
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
@@ -143,12 +140,14 @@ protected:
 	FTimerHandle FiringTimer;
 	
 	// --- MUERTE --- //
-
 	UFUNCTION(NetMulticast, Reliable, Category = "Muerte")
 	void HandleDeath();
 	
+	UPROPERTY(BlueprintReadOnly, Category = "Muerte")
+	bool bShowGameOverUI = false;
+	
 	// --- SISTEMA DE MUNICIÓN --- //
-
+	
 	/** Valor máximo de munición */
 	UPROPERTY(EditDefaultsOnly, Category = "Armas")
 	int32 MaxAmmo;

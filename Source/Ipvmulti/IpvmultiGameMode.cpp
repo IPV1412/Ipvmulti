@@ -46,3 +46,28 @@ void AIpvmultiGameMode::CompleteMission(APawn* Pawn)
 	}
 	OnMissionComplete(Pawn);
 }
+
+void AIpvmultiGameMode::RestartPlayer(AController* NewPlayer)
+{
+	if (NewPlayer)
+	{
+		FTransform SpawnTransform;
+		AActor* StartSpot = FindPlayerStart(NewPlayer);
+		if (StartSpot)
+		{
+			SpawnTransform = StartSpot->GetActorTransform();
+		}
+		else
+		{
+			SpawnTransform = FTransform();
+		}
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		APawn* NewPawn = GetWorld()->SpawnActor<APawn>(DefaultPawnClass, SpawnTransform, SpawnParams);
+		
+		if (NewPawn)
+		{
+			NewPlayer->Possess(NewPawn);
+		}
+	}
+}

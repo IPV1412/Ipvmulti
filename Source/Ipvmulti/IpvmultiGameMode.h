@@ -19,6 +19,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = GM)
 	void OnMissionComplete(APawn* Pawn);
 
+	virtual void RestartPlayer(AController* NewPlayer) override;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Spectator")
 	TSubclassOf<AActor> SpectatorViewClass;
