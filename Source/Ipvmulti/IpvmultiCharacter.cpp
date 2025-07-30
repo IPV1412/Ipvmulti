@@ -11,7 +11,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Actors/Proyectil.h"
-#include "Blueprint/UserWidget.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/Engine.h"
 #include "GameFramework/GameModeBase.h"
@@ -275,6 +274,19 @@ void AIpvmultiCharacter::HandleDeath_Implementation()
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// Mostrar UI SOLO al jugador local
+	if (IsLocallyControlled())
+	{
+		// Llama al evento ShowGO del Blueprint
+		FName FunctionName = FName("ShowGO");
+		if (UFunction* Func = FindFunction(FunctionName))
+		{
+			FString deathMessage = FString::Printf(TEXT("GAMEOVER."));
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
+			ProcessEvent(Func, nullptr);
+		}
+	}
 
 	// Desactivar input SOLO para el jugador que controla este pawn
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
