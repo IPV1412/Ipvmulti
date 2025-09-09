@@ -15,7 +15,7 @@ AAgua::AAgua()
 	DamageBox = CreateDefaultSubobject<UBoxComponent>(TEXT("DamageBox"));
 	RootComponent = DamageBox;
 
-	DamageBox->InitBoxExtent(FVector(200.f, 200.f, 100.f)); 
+	DamageBox->InitBoxExtent(FVector(50000.f, 60000.f, 100.f)); 
 	DamageBox->SetCollisionProfileName(TEXT("Trigger"));
 
 	//overlap
