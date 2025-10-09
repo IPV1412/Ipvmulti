@@ -15,13 +15,16 @@
 #include "Engine/Engine.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "OnlineSubsystem.h"
+#include "OnlineSessionSettings.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
 // AIpvmultiCharacter
 
-AIpvmultiCharacter::AIpvmultiCharacter()
+AIpvmultiCharacter::AIpvmultiCharacter():
+CreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this,&ThisClass::OnCreateSessionComplete))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -58,6 +61,18 @@ AIpvmultiCharacter::AIpvmultiCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
+	IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
+	if (OnlineSubsystem)
+	{
+		OnlineSessionInterface = OnlineSubsystem->GetSessionInterface();
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Purple,
+				FString::Printf(TEXT("Found Online Subsystem %s"), * OnlineSubsystem->GetSubsystemName().ToString()));
+			
+		}
+	}
+	
 	//Initialize the player's Health
 	MaxHealth = 100.0f;
 	CurrentHealth = MaxHealth;
@@ -332,6 +347,60 @@ void AIpvmultiCharacter::TryFire()
 			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Sin munición."));
 		}
 	}
+}
+
+void AIpvmultiCharacter::CreateGameSession()
+{
+	if (!OnlineSessionInterface.IsValid()) return;
+	FNamedOnlineSession* ExistingSession = OnlineSessionInterface -> GetNamedSession(NAME_GameSession);
+	if (ExistingSession)
+	{
+		OnlineSessionInterface->DestroySession(NAME_GameSession);
+	}
+	//Delegate-list
+	OnlineSessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
+	//CreateSession
+	TSharedPtr<FOnlineSessionSettings> SessionSettings = MakeShareable(new FOnlineSessionSettings());
+	SessionSettings -> bIsLANMatch = false;
+	SessionSettings -> NumPublicConnections = 4;
+	SessionSettings -> bAllowJoinInProgress = true;
+	SessionSettings -> bAllowJoinViaPresence = true;
+	SessionSettings -> bShouldAdvertise = true;
+	SessionSettings -> bUsesPresence = true;
+
+	const ULocalPlayer * LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(),NAME_GameSession,*SessionSettings);
+}	
+
+void AIpvmultiCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
+{
+	if(bWasSuccessful)
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Blue,
+				FString::Printf(TEXT("Created Session %s"), *SessionName.ToString()) 
+			);
+		}
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			World->ServerTravel("Game/IPV-Multi/Mapas/IPV_Level?listen");  
+		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Red,
+			FString(TEXT("Create Session Failed"))
+		);
+	}
+
 }
 
 bool AIpvmultiCharacter::ServerHandleFire_Validate()

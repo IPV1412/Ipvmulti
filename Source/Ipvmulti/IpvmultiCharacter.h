@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OnlineSubsystem.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "GameFramework/PlayerController.h"
 #include "TimerManager.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "IpvmultiCharacter.generated.h"
 
 class USpringArmComponent;
@@ -14,6 +16,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
+
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -116,7 +119,7 @@ public:
 	void RestoreAmmo();
 
 	UPROPERTY(BlueprintReadOnly, Category = "Objetive")
-	bool bCarryObjetive = false; 
+	bool bCarryObjetive = false;;
 
 protected:
 // ---  Proyectil  --- //
@@ -174,6 +177,22 @@ protected:
 	/** Intenta disparar */
 	UFUNCTION(BlueprintCallable, Category="Armas")
 	void TryFire();
+
+public:
+	//TSharedPtr <class IOnlineSession, ESPMode::ThreadSafe> OnlineSessionInterface;
+	IOnlineSessionPtr OnlineSessionInterface;
+
+protected:
+	UFUNCTION(BlueprintCallable)
+	void CreateGameSession();
+	
+	//callback
+	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful );
+
+private:
+	//Delegate
+	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;
+	
 	
 };
 
