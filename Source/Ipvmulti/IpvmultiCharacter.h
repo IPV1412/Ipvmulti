@@ -183,16 +183,24 @@ public:
 	IOnlineSessionPtr OnlineSessionInterface;
 
 protected:
+	//callback CreateSession
+	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful );
 	UFUNCTION(BlueprintCallable)
 	void CreateGameSession();
-	
-	//callback
-	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful );
+
+	//callback FindSession
+	void OnFindSessionComplete(bool bWasSuccessful );
+	UFUNCTION(BlueprintCallable)
+	void JoinGameSession();
+
 
 private:
-	//Delegate
+	//Delegates
 	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;
-	
+	FOnFindSessionsCompleteDelegate FindSessionsCompleteDelegate;
+
+	//Session Search
+	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 	
 };
 
