@@ -453,6 +453,9 @@ void AIpvmultiCharacter::OnFindSessionComplete(bool bWasSuccessful)
 				//Delegate-list
 				OnlineSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(JoinSessionsCompleteDelegate);
 
+				Result.Session.SessionSettings.bUseLobbiesIfAvailable = true;
+				Result.Session.SessionSettings.bUsesPresence = true;
+
 				const ULocalPlayer * LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 				OnlineSessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, Result);
 			}
@@ -468,7 +471,7 @@ void AIpvmultiCharacter::OnJoinSessionComplete(FName SessionName, EOnJoinSession
 
 	FString Address;
 
-	if (OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address))
+	if (OnlineSessionInterface->GetResolvedConnectString(SessionName, Address))
 	{
 		if(GEngine)
 		{
@@ -516,7 +519,7 @@ void AIpvmultiCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSuc
 		UWorld* World = GetWorld();
 		if (World)
 		{
-			World->ServerTravel("/Game/IPV-Multi/Mapas/IPV_Level?listen");  
+			World->ServerTravel("/Game/IPV-Multi/Mapas/IPV_Level?list");  
 		}
 	}
 	else
