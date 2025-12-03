@@ -588,7 +588,7 @@ void AIpvmultiCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSuc
       UWorld* World = GetWorld();
       if (World)
       {
-         World->ServerTravel("/Game/IPV-Multi/Mapas/IPV_Level?list"); 
+         World->ServerTravel("/Game/IPV-Multi/Mapas/IPV_Level?listen"); 
       }
    }
    else
